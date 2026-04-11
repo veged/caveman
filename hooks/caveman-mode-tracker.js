@@ -35,7 +35,16 @@ process.stdin.on('end', () => {
         else if (arg === 'wenyan-lite') mode = 'wenyan-lite';
         else if (arg === 'wenyan' || arg === 'wenyan-full') mode = 'wenyan';
         else if (arg === 'wenyan-ultra') mode = 'wenyan-ultra';
+        else if (arg === 'ru' || arg === 'ru-full') mode = 'ru-full';
+        else if (arg === 'ru-lite') mode = 'ru-lite';
+        else if (arg === 'ru-ultra') mode = 'ru-ultra';
+        else if (arg === 'ru-notes') mode = 'ru-notes';
         else mode = 'full';
+      } else if (cmd === '/caveman-ru' || cmd === '/caveman:caveman-ru') {
+        if (arg === 'lite') mode = 'ru-lite';
+        else if (arg === 'ultra') mode = 'ru-ultra';
+        else if (arg === 'notes') mode = 'ru-notes';
+        else mode = 'ru-full';
       }
 
       if (mode) {
@@ -44,8 +53,9 @@ process.stdin.on('end', () => {
       }
     }
 
-    // Detect deactivation
-    if (/\b(stop caveman|normal mode)\b/i.test(prompt)) {
+    // Detect deactivation (EN + RU)
+    if (/\b(stop caveman|normal mode)\b/i.test(prompt) ||
+        /(обычный режим|выключи пещерн|стоп пещерн|выключи caveman|нормальный режим)/i.test(prompt)) {
       try { fs.unlinkSync(flagPath); } catch (e) {}
     }
   } catch (e) {

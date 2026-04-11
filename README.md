@@ -343,6 +343,8 @@ Stop with: "stop caveman" or "normal mode"
 | **Full** | `/caveman full` | Default caveman. Drop articles, fragments, full grunt |
 | **Ultra** | `/caveman ultra` | Maximum compression. Telegraphic. Abbreviate everything |
 
+Caveman also speak Russian now — see [Russian Mode](#-russian-mode) below. Four level: `ru-lite`, `ru-full`, `ru-ultra`, `ru-notes`.
+
 ### 文言文 (Wenyan) Mode
 
 Classical Chinese literary compression — same technical accuracy, but in the most token-efficient written language humans ever invented.
@@ -354,6 +356,73 @@ Classical Chinese literary compression — same technical accuracy, but in the m
 | **Wenyan-Ultra** | `/caveman wenyan-ultra` | Extreme. Ancient scholar on a budget |
 
 Level stick until you change it or session end.
+
+### 🇷🇺 Russian Mode
+
+Russian more long than English. More word-ending. More filler. Caveman fix.
+
+Russian Caveman cut вводные, вежливые обёртки, паразиты («проблема заключается в том, что»). Arrow and colon replace long connective. Code, URL, path, API, JSON — не трогать.
+
+**Before / After (Russian):**
+
+<table>
+<tr>
+<td width="50%">
+
+#### 🗣️ Normal Russian
+
+> "Скорее всего, проблема заключается в том, что объект создаётся на каждом рендере, поэтому React считает prop новым и повторно рендерит компонент. Используйте `useMemo`, чтобы сохранить ссылку между рендерами."
+
+</td>
+<td width="50%">
+
+#### 🪨 Russian Caveman (ru-full)
+
+> "Новый объект каждый рендер → React видит новый prop → повторный рендер. Оберни в `useMemo`."
+
+</td>
+</tr>
+</table>
+
+**Four levels. Pick your grunt:**
+
+| Level | Trigger | What it do | Use for |
+|-------|---------|-----------|---------|
+| **ru-lite** | `/caveman ru-lite` | Мягко. Полные предложения. Минимум воды. | user-facing, документация |
+| **ru-full** | `/caveman ru-full` (или `/caveman ru`) | Короткие фразы. Дропать местоимения. Фрагменты OK. | техобъяснения, code review, debug |
+| **ru-ultra** | `/caveman ru-ultra` | Телеграф. Стрелки, двоеточия, маркеры. | agent answers, summaries |
+| **ru-notes** | `/caveman ru-notes` | Конспект. Максимум сжатия. Схемы, метки. | заметки для себя / другого агента |
+
+**Same bug. Four grunt level:**
+
+- **ru-lite**: «Объект создаётся на каждом рендере. React видит новый prop и делает повторный рендер. Используйте `useMemo`.»
+- **ru-full**: «Новый объект каждый рендер → React видит новый prop → повторный рендер. Оберни в `useMemo`.»
+- **ru-ultra**: «Каждый рендер: новый object → новый prop → re-render. Решение: `useMemo`.»
+- **ru-notes**: «new object each render → prop changed → re-render. fix: `useMemo`.»
+
+**Инварианты — не трогать** (invariants never touched): код, shell, URL, пути, имена файлов, API, функции, классы, переменные, JSON/YAML/SQL, stack traces, цитаты ошибок.
+
+**Whitelist сокращений** (allowed abbreviations): `т.к.`, `т.е.`, `и т.д.`, `и т.п.`, `см.`, `напр.`, `кол-во`, `к-рый`, `св-во`, `ЧТД`. Ничего больше не изобретать. Full list: [`skills/caveman-ru/abbreviations.md`](skills/caveman-ru/abbreviations.md).
+
+**Выключить** (turn off): `stop caveman`, `обычный режим`, `нормальный режим`.
+
+Level stick until you change it or session end. Full rules: [`skills/caveman-ru/SKILL.md`](skills/caveman-ru/SKILL.md). Test corpus: [`tests/corpus-ru/`](tests/corpus-ru/).
+
+#### Когда какой уровень
+
+- **ru-lite** — пишешь пользователю / в доку. Смысл + вежливость нужны.
+- **ru-full** — техобъяснение разработчику. Default для большинства случаев.
+- **ru-ultra** — agent-to-agent, сводки, ты знаешь контекст.
+- **ru-notes** — заметка «для себя через неделю». Не стесняйся смешивать RU + EN технические термины.
+
+#### Когда НЕ использовать ultra / notes
+
+- security warnings;
+- необратимые операции (`DROP`, `rm -rf`, force push);
+- пошаговые инструкции, где перепутанный порядок всё ломает;
+- пользователь запутался или переспрашивает.
+
+Auto-Clarity: режим сам выходит из сжатия в этих случаях и возвращается после.
 
 ## Caveman Skills
 
