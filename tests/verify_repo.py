@@ -88,6 +88,69 @@ def verify_synced_files() -> None:
             "caveman.skill payload mismatch",
         )
 
+    # Russian caveman synced copies
+    ru_skill_source = ROOT / "skills/caveman-ru/SKILL.md"
+    ru_abbr_source = ROOT / "skills/caveman-ru/abbreviations.md"
+    ru_rule_source = ROOT / "rules/caveman-ru-activate.md"
+
+    ru_skill_copies = [
+        ROOT / "plugins/caveman/skills/caveman-ru/SKILL.md",
+        ROOT / ".cursor/skills/caveman-ru/SKILL.md",
+        ROOT / ".windsurf/skills/caveman-ru/SKILL.md",
+    ]
+    for copy in ru_skill_copies:
+        ensure(
+            copy.read_text() == ru_skill_source.read_text(),
+            f"Russian skill copy mismatch: {copy}",
+        )
+
+    ru_abbr_copies = [
+        ROOT / "plugins/caveman/skills/caveman-ru/abbreviations.md",
+        ROOT / ".cursor/skills/caveman-ru/abbreviations.md",
+        ROOT / ".windsurf/skills/caveman-ru/abbreviations.md",
+    ]
+    for copy in ru_abbr_copies:
+        ensure(
+            copy.read_text() == ru_abbr_source.read_text(),
+            f"Russian abbreviations copy mismatch: {copy}",
+        )
+
+    # Cline rule: direct copy
+    ensure(
+        (ROOT / ".clinerules/caveman-ru.md").read_text() == ru_rule_source.read_text(),
+        "Cline Russian rule copy mismatch",
+    )
+
+    # Cursor + Windsurf rules: frontmatter prepended, body identical
+    cursor_ru = (ROOT / ".cursor/rules/caveman-ru.mdc").read_text()
+    ensure(cursor_ru.startswith("---\n"), "Cursor Russian rule missing frontmatter")
+    ensure("alwaysApply: false" in cursor_ru, "Cursor Russian rule should be opt-in")
+    ensure(
+        ru_rule_source.read_text().strip() in cursor_ru,
+        "Cursor Russian rule body mismatch",
+    )
+
+    windsurf_ru = (ROOT / ".windsurf/rules/caveman-ru.md").read_text()
+    ensure(windsurf_ru.startswith("---\n"), "Windsurf Russian rule missing frontmatter")
+    ensure(
+        "trigger: model_decision" in windsurf_ru,
+        "Windsurf Russian rule should use model_decision trigger",
+    )
+    ensure(
+        ru_rule_source.read_text().strip() in windsurf_ru,
+        "Windsurf Russian rule body mismatch",
+    )
+
+    with zipfile.ZipFile(ROOT / "caveman-ru.skill") as archive:
+        ensure(
+            "caveman-ru/SKILL.md" in archive.namelist(),
+            "caveman-ru.skill missing caveman-ru/SKILL.md",
+        )
+        ensure(
+            archive.read("caveman-ru/SKILL.md").decode("utf-8") == ru_skill_source.read_text(),
+            "caveman-ru.skill payload mismatch",
+        )
+
     print("Synced copies and caveman.skill zip OK")
 
 

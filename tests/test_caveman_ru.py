@@ -136,14 +136,21 @@ def _allowed_new_idents(case):
 
 
 class RussianCavemanHookTests(unittest.TestCase):
-    def _run_tracker(self, prompt):
+    def _run_tracker(self, prompt, settings=None, env_overrides=None):
         with tempfile.TemporaryDirectory(prefix="caveman-ru-") as tmp:
             home = Path(tmp)
+            if settings is not None:
+                (home / ".claude").mkdir(parents=True, exist_ok=True)
+                (home / ".claude" / "settings.json").write_text(
+                    json.dumps(settings), encoding="utf-8"
+                )
             env = {
                 "HOME": str(home),
                 "USERPROFILE": str(home),
                 "PATH": "/usr/bin:/bin:/usr/local/bin",
             }
+            if env_overrides:
+                env.update(env_overrides)
             subprocess.run(
                 ["node", str(MODE_TRACKER)],
                 input=json.dumps({"prompt": prompt}),
@@ -197,6 +204,209 @@ class RussianCavemanHookTests(unittest.TestCase):
                 check=True,
             )
             self.assertFalse(flag.exists(), "Russian deactivation phrase must clear flag")
+
+
+class AutoDetectLanguageTests(unittest.TestCase):
+    """Tests for the opt-in Cyrillic auto-detection in the mode tracker."""
+
+    def _seed_and_run(self, seed_mode, prompt, *, enabled=True, via_env=False):
+        """Create a temp HOME, seed the flag file with `seed_mode`, optionally
+        enable auto-detect via settings.json or env, run the tracker with
+        `prompt`, then return the final flag contents (or None if deleted)."""
+        with tempfile.TemporaryDirectory(prefix="caveman-autodetect-") as tmp:
+            home = Path(tmp)
+            claude = home / ".claude"
+            claude.mkdir(parents=True, exist_ok=True)
+            if seed_mode is not None:
+                (claude / ".caveman-active").write_text(seed_mode, encoding="utf-8")
+
+            settings = {}
+            if enabled and not via_env:
+                settings = {"caveman": {"autoDetectLanguage": True}}
+            if settings:
+                (claude / "settings.json").write_text(
+                    json.dumps(settings), encoding="utf-8"
+                )
+
+            env = {
+                "HOME": str(home),
+                "USERPROFILE": str(home),
+                "PATH": "/usr/bin:/bin:/usr/local/bin",
+            }
+            if enabled and via_env:
+                env["CAVEMAN_AUTO_DETECT_LANG"] = "1"
+
+            subprocess.run(
+                ["node", str(MODE_TRACKER)],
+                input=json.dumps({"prompt": prompt}),
+                text=True,
+                env=env,
+                check=True,
+            )
+            flag = claude / ".caveman-active"
+            return flag.read_text(encoding="utf-8") if flag.exists() else None
+
+    def test_russian_prompt_flips_full_to_ru_full(self):
+        result = self._seed_and_run(
+            "full",
+            "Почему мой React компонент рендерится каждый раз при обновлении родителя?",
+        )
+        self.assertEqual(result, "ru-full")
+
+    def test_russian_prompt_flips_lite_to_ru_lite(self):
+        result = self._seed_and_run(
+            "lite",
+            "Объясни подробно, как работает connection pool в базе данных.",
+        )
+        self.assertEqual(result, "ru-lite")
+
+    def test_russian_prompt_flips_ultra_to_ru_ultra(self):
+        result = self._seed_and_run(
+            "ultra",
+            "Как посмотреть, какой процесс держит порт 8080 на Linux?",
+        )
+        self.assertEqual(result, "ru-ultra")
+
+    def test_english_prompt_flips_ru_full_to_full(self):
+        result = self._seed_and_run(
+            "ru-full",
+            "Why does my React component re-render on every parent update?",
+        )
+        self.assertEqual(result, "full")
+
+    def test_disabled_by_default(self):
+        """Without opting in, Russian prompt must NOT flip the mode."""
+        result = self._seed_and_run(
+            "full",
+            "Почему мой React компонент рендерится каждый раз?",
+            enabled=False,
+        )
+        self.assertEqual(result, "full")
+
+    def test_enabled_via_env(self):
+        result = self._seed_and_run(
+            "full",
+            "Почему мой React компонент рендерится каждый раз?",
+            via_env=True,
+        )
+        self.assertEqual(result, "ru-full")
+
+    def test_english_with_cyrillic_identifiers_does_not_flip(self):
+        """English prompt that just mentions a Cyrillic token in backticks
+        must NOT be treated as Russian — code fences are stripped first."""
+        result = self._seed_and_run(
+            "full",
+            "Why is `кириллица_var` undefined when I import the module from Python?",
+        )
+        self.assertEqual(result, "full")
+
+    def test_short_prompt_does_not_flip(self):
+        result = self._seed_and_run("full", "да", enabled=True)
+        self.assertEqual(result, "full")
+
+    def test_explicit_command_overrides_autodetect(self):
+        """`/caveman full` on a Russian-looking prompt must still set full."""
+        result = self._seed_and_run(
+            "ru-full",
+            "/caveman full пожалуйста переключись на английский",
+        )
+        self.assertEqual(result, "full")
+
+    def test_ru_notes_not_autoflipped_on_english(self):
+        """ru-notes has no English equivalent; an English prompt should still
+        flip back to the sensible default `full`, not get stuck."""
+        result = self._seed_and_run(
+            "ru-notes",
+            "Please explain how to fix this bug in the authentication middleware.",
+        )
+        self.assertEqual(result, "full")
+
+
+class SessionStartLanguageTests(unittest.TestCase):
+    """Tests for the default-language logic in hooks/caveman-activate.js."""
+
+    ACTIVATE = REPO_ROOT / "hooks" / "caveman-activate.js"
+
+    def _run(self, *, settings=None, env_overrides=None):
+        with tempfile.TemporaryDirectory(prefix="caveman-activate-") as tmp:
+            home = Path(tmp)
+            claude = home / ".claude"
+            claude.mkdir(parents=True, exist_ok=True)
+            if settings is not None:
+                (claude / "settings.json").write_text(
+                    json.dumps(settings), encoding="utf-8"
+                )
+            env = {
+                "HOME": str(home),
+                "USERPROFILE": str(home),
+                "PATH": "/usr/bin:/bin:/usr/local/bin",
+            }
+            if env_overrides:
+                env.update(env_overrides)
+            result = subprocess.run(
+                ["node", str(self.ACTIVATE)],
+                text=True,
+                env=env,
+                capture_output=True,
+                check=True,
+            )
+            flag = claude / ".caveman-active"
+            return {
+                "stdout": result.stdout,
+                "flag": flag.read_text(encoding="utf-8") if flag.exists() else None,
+            }
+
+    def test_default_is_english(self):
+        r = self._run()
+        self.assertEqual(r["flag"], "full")
+        self.assertIn("CAVEMAN MODE ACTIVE", r["stdout"])
+        self.assertNotIn("CAVEMAN-RU", r["stdout"])
+
+    def test_settings_caveman_lang_ru(self):
+        r = self._run(settings={"caveman": {"lang": "ru"}})
+        self.assertEqual(r["flag"], "ru-full")
+        self.assertIn("CAVEMAN-RU", r["stdout"])
+        self.assertIn("Инварианты", r["stdout"])
+
+    def test_settings_caveman_lang_en_explicit(self):
+        r = self._run(settings={"caveman": {"lang": "en"}})
+        self.assertEqual(r["flag"], "full")
+        self.assertIn("CAVEMAN MODE ACTIVE", r["stdout"])
+
+    def test_env_var_overrides_settings(self):
+        r = self._run(
+            settings={"caveman": {"lang": "en"}},
+            env_overrides={"CAVEMAN_LANG": "ru"},
+        )
+        self.assertEqual(r["flag"], "ru-full")
+        self.assertIn("CAVEMAN-RU", r["stdout"])
+
+    def test_invalid_lang_falls_back_to_english(self):
+        r = self._run(settings={"caveman": {"lang": "de"}})
+        self.assertEqual(r["flag"], "full")
+
+    def test_malformed_settings_is_silent_fallback(self):
+        with tempfile.TemporaryDirectory(prefix="caveman-bad-settings-") as tmp:
+            home = Path(tmp)
+            claude = home / ".claude"
+            claude.mkdir(parents=True, exist_ok=True)
+            (claude / "settings.json").write_text("{ this is not valid json")
+            env = {
+                "HOME": str(home),
+                "USERPROFILE": str(home),
+                "PATH": "/usr/bin:/bin:/usr/local/bin",
+            }
+            result = subprocess.run(
+                ["node", str(self.ACTIVATE)],
+                text=True,
+                env=env,
+                capture_output=True,
+                check=True,
+            )
+            self.assertEqual(
+                (claude / ".caveman-active").read_text(encoding="utf-8"), "full"
+            )
+            self.assertIn("CAVEMAN MODE ACTIVE", result.stdout)
 
 
 if __name__ == "__main__":
