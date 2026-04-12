@@ -37,6 +37,9 @@ def run(
     check: bool = True,
 ) -> subprocess.CompletedProcess[str]:
     merged_env = os.environ.copy()
+    # Ensure caveman language env vars don't leak from the test runner
+    merged_env.pop("CAVEMAN_LANG", None)
+    merged_env.pop("CAVEMAN_AUTO_DETECT_LANG", None)
     if env:
         merged_env.update(env)
     result = subprocess.run(

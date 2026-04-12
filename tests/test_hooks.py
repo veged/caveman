@@ -14,6 +14,9 @@ class HookScriptTests(unittest.TestCase):
         env = os.environ.copy()
         env["HOME"] = str(home)
         env["USERPROFILE"] = str(home)
+        # Ensure caveman language env vars don't leak from the test runner
+        env.pop("CAVEMAN_LANG", None)
+        env.pop("CAVEMAN_AUTO_DETECT_LANG", None)
         return subprocess.run(
             cmd,
             cwd=REPO_ROOT,
