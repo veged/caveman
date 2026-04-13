@@ -37,12 +37,12 @@ class RussianCavemanAssetsTests(unittest.TestCase):
         self.assertIn("ru-ultra", text)
         self.assertIn("ru-notes", text)
 
-    def test_abbreviations_whitelist_present(self):
-        abbr = SKILL_DIR / "russian-abbrs.md"
-        self.assertTrue(abbr.exists(), f"missing {abbr}")
-        text = abbr.read_text(encoding="utf-8")
+    def test_abbreviations_in_russian_rules(self):
+        rules = SKILL_DIR / "russian-rules.md"
+        self.assertTrue(rules.exists(), f"missing {rules}")
+        text = rules.read_text(encoding="utf-8")
         for token in ["т.к.", "т.е.", "и т.д.", "см.", "напр.", "кол-во", "ЧТД"]:
-            self.assertIn(token, text, f"whitelist must mention {token!r}")
+            self.assertIn(token, text, f"russian-rules.md must mention {token!r}")
 
     def test_activation_rule_mentions_russian(self):
         rule = REPO_ROOT / "rules" / "caveman-activate.md"

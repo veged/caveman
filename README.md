@@ -402,7 +402,7 @@ Russian Caveman cut filler intros, polite wrappers, parasitic constructions. Arr
 
 **Invariants never touched:** code, shell, URL, paths, filenames, API, functions, classes, variables, JSON/YAML/SQL, stack traces, error quotes.
 
-**Allowed abbreviations:** only well-known Russian shorthand — `т.к.`, `т.е.`, `и т.д.`, `и т.п.`, `см.`, `напр.`, `кол-во`, `к-рый`, `св-во`, `ЧТД`. No inventing new ones. Full list: [`skills/caveman/russian-abbrs.md`](skills/caveman/russian-abbrs.md).
+**Allowed abbreviations:** only well-known Russian shorthand — `т.к.`, `т.е.`, `и т.д.`, `и т.п.`, `см.`, `напр.`, `кол-во`, `к-рый`, `св-во`, `ЧТД`. No inventing new ones. Full list in [`skills/caveman/russian-rules.md`](skills/caveman/russian-rules.md).
 
 **Turn off:** `stop caveman`, `обычный режим`, `нормальный режим`.
 

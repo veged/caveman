@@ -93,9 +93,7 @@ def verify_synced_files() -> None:
 
     # Russian supplementary files synced alongside main skill
     ru_rules_source = ROOT / "skills/caveman/russian-rules.md"
-    ru_abbr_source = ROOT / "skills/caveman/russian-abbrs.md"
-
-    for name, source in [("russian-rules.md", ru_rules_source), ("russian-abbrs.md", ru_abbr_source)]:
+    for name, source in [("russian-rules.md", ru_rules_source)]:
         copies = [
             ROOT / f"caveman/{name}",
             ROOT / f"plugins/caveman/skills/caveman/{name}",
