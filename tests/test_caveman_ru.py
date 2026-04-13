@@ -38,7 +38,7 @@ class RussianCavemanAssetsTests(unittest.TestCase):
         self.assertIn("ru-notes", text)
 
     def test_abbreviations_whitelist_present(self):
-        abbr = SKILL_DIR / "abbreviations-ru.md"
+        abbr = SKILL_DIR / "russian-abbrs.md"
         self.assertTrue(abbr.exists(), f"missing {abbr}")
         text = abbr.read_text(encoding="utf-8")
         for token in ["т.к.", "т.е.", "и т.д.", "см.", "напр.", "кол-во", "ЧТД"]:

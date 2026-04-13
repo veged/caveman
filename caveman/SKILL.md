@@ -53,7 +53,11 @@ Example — "Why React component re-render?"
 - ru-ultra: «Встроенный объект → новая ссылка → повторный рендер. Решение: `useMemo`.»
 - ru-notes: «каждый рендер: новый объект → новое свойство → повторный рендер. исправление: `useMemo`.»
 
-For Russian mode detailed rules (what to cut, syntax compression, abbreviation whitelist): see `russian-rules.md` in this skill directory.
+## Russian Mode
+
+For `ru-*` levels, respond in Russian. Detailed rules in supplementary files (same directory):
+- `russian-rules.md` — what to cut, syntax compression patterns, phrase templates, invariants
+- `russian-abbrs.md` — allowed abbreviation whitelist (т.к., т.е., БД, ОС, ПО, ЧТД, etc.)
 
 ## Auto-Clarity
 
