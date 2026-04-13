@@ -5,10 +5,9 @@ on:
     branches: [main]
     paths:
       - skills/caveman/SKILL.md
-      - skills/caveman-ru/SKILL.md
-      - skills/caveman-ru/abbreviations.md
+      - skills/caveman/russian-rules.md
+      - skills/caveman/abbreviations-ru.md
       - rules/caveman-activate.md
-      - rules/caveman-ru-activate.md
       - caveman-compress/SKILL.md
       - caveman-compress/scripts/**
 
@@ -40,22 +39,13 @@ jobs:
           mkdir -p .windsurf/skills/caveman
           cp skills/caveman/SKILL.md .windsurf/skills/caveman/SKILL.md
 
-      - name: Sync caveman-ru SKILL.md + abbreviations
+      - name: Sync Russian supplementary files
         run: |
-          # Plugin target
-          mkdir -p plugins/caveman/skills/caveman-ru
-          cp skills/caveman-ru/SKILL.md plugins/caveman/skills/caveman-ru/SKILL.md
-          cp skills/caveman-ru/abbreviations.md plugins/caveman/skills/caveman-ru/abbreviations.md
-
-          # Cursor skill target
-          mkdir -p .cursor/skills/caveman-ru
-          cp skills/caveman-ru/SKILL.md .cursor/skills/caveman-ru/SKILL.md
-          cp skills/caveman-ru/abbreviations.md .cursor/skills/caveman-ru/abbreviations.md
-
-          # Windsurf skill target
-          mkdir -p .windsurf/skills/caveman-ru
-          cp skills/caveman-ru/SKILL.md .windsurf/skills/caveman-ru/SKILL.md
-          cp skills/caveman-ru/abbreviations.md .windsurf/skills/caveman-ru/abbreviations.md
+          for target in caveman plugins/caveman/skills/caveman .cursor/skills/caveman .windsurf/skills/caveman; do
+            mkdir -p "$target"
+            cp skills/caveman/russian-rules.md "$target/russian-rules.md"
+            cp skills/caveman/abbreviations-ru.md "$target/abbreviations-ru.md"
+          done
 
       - name: Sync compress skill to plugin
         run: |
@@ -71,9 +61,6 @@ jobs:
 
       - name: Rebuild caveman.skill ZIP
         run: cd skills && zip -r ../caveman.skill caveman/
-
-      - name: Rebuild caveman-ru.skill ZIP
-        run: cd skills && zip -r ../caveman-ru.skill caveman-ru/
 
       - name: Sync auto-activation rules
         run: |
@@ -94,53 +81,27 @@ jobs:
           printf '%s\n' '---' 'trigger: always_on' '---' '' > .windsurf/rules/caveman.md
           cat "$BODY" >> .windsurf/rules/caveman.md
 
-      - name: Sync Russian auto-activation rules
-        run: |
-          RU_BODY="rules/caveman-ru-activate.md"
-
-          # Cline — direct copy. `.clinerules/` is auto-loaded, English and
-          # Russian rules coexist; the Russian SKILL header explains when to
-          # activate (user writes in Russian / asks for Russian mode).
-          mkdir -p .clinerules
-          cp "$RU_BODY" .clinerules/caveman-ru.md
-
-          # Cursor — opt-in (alwaysApply: false + agent-requested description).
-          # Users who want Russian always-on can flip alwaysApply themselves.
-          mkdir -p .cursor/rules
-          printf '%s\n' '---' 'description: "Russian Caveman — compressed Russian technical answers. Activate when user writes in Russian or asks for Russian mode (/caveman ru, /caveman-ru)."' 'alwaysApply: false' '---' '' > .cursor/rules/caveman-ru.mdc
-          cat "$RU_BODY" >> .cursor/rules/caveman-ru.mdc
-
-          # Windsurf — opt-in via model_decision trigger.
-          mkdir -p .windsurf/rules
-          printf '%s\n' '---' 'trigger: model_decision' 'description: "Russian Caveman — activate when user writes in Russian or asks for Russian mode."' '---' '' > .windsurf/rules/caveman-ru.md
-          cat "$RU_BODY" >> .windsurf/rules/caveman-ru.md
-
-          # NOTE: we deliberately do NOT append Russian rules to
-          # .github/copilot-instructions.md or AGENTS.md — those are single,
-          # repo-wide instruction files and the English version is the
-          # default. Russian Copilot users can pull in skills/caveman-ru/
-          # manually or set `caveman.lang: ru` in their local settings.
-
       - name: Commit and push if changed
         run: |
           git add \
             caveman/SKILL.md \
+            caveman/russian-rules.md \
+            caveman/abbreviations-ru.md \
             plugins/caveman/skills/compress/ \
             plugins/caveman/skills/caveman/SKILL.md \
-            plugins/caveman/skills/caveman-ru/ \
+            plugins/caveman/skills/caveman/russian-rules.md \
+            plugins/caveman/skills/caveman/abbreviations-ru.md \
             .cursor/skills/caveman/SKILL.md \
-            .cursor/skills/caveman-ru/ \
+            .cursor/skills/caveman/russian-rules.md \
+            .cursor/skills/caveman/abbreviations-ru.md \
             .windsurf/skills/caveman/SKILL.md \
-            .windsurf/skills/caveman-ru/ \
+            .windsurf/skills/caveman/russian-rules.md \
+            .windsurf/skills/caveman/abbreviations-ru.md \
             caveman.skill \
-            caveman-ru.skill \
             .clinerules/caveman.md \
-            .clinerules/caveman-ru.md \
             .github/copilot-instructions.md \
             .cursor/rules/caveman.mdc \
-            .cursor/rules/caveman-ru.mdc \
-            .windsurf/rules/caveman.md \
-            .windsurf/rules/caveman-ru.md
+            .windsurf/rules/caveman.md
           git diff --staged --quiet && exit 0
           git commit -m "chore: sync SKILL.md copies and auto-activation rules [skip ci]"
           git push

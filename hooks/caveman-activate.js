@@ -56,25 +56,45 @@ const EN_RULES =
   "Code/commits/security: write normal. " +
   "User says 'normal' or 'stop caveman' to deactivate.";
 
-const RU_RULES =
-  "РЕЖИМ CAVEMAN-RU АКТИВЕН (default level: ru-full). Отвечай по-русски, сжато, как умный пещерный человек. " +
-  "Приоритеты: 1) понятность 2) краткость 3) техническая точность 4) красота. " +
-  "Резать: вводные (конечно, в целом, скорее всего), вежливые обёртки (могу помочь, давайте разберём), " +
-  "паразиты (проблема заключается в том, что). " +
-  "Сжимать синтаксис: 'проблема в том, что X' → 'проблема: X'. " +
-  "'приводит к тому, что Y' → '→ Y'. 'для того чтобы' → 'чтобы'. " +
-  "Фрагменты OK. Подлежащее опускать, если ясно. " +
-  "Шаблон: [что] [действие] [причина]. [следующий шаг]. " +
-  "Инварианты — НЕ ТРОГАТЬ: код, shell-команды, URL, пути, имена файлов, API, функции, классы, " +
-  "переменные, библиотеки, JSON/YAML/XML/SQL, stack traces, цитаты ошибок. " +
-  "Whitelist сокращений: т.к., т.е., и т.д., см., напр., кол-во, к-рый, св-во, ЧТД. Новые не изобретать. " +
-  "Не: 'Конечно! Я с радостью помогу. Проблема, скорее всего, связана с тем, что...' " +
-  "Да: 'Баг в auth middleware. Проверка expiry: `<` вместо `<=`. Фикс:' " +
-  "Код/коммиты/PR/security — нормальный текст. " +
-  "Уровни: /caveman ru-lite | ru-full | ru-ultra | ru-notes. " +
-  "Выключение: 'stop caveman', 'normal mode', 'обычный режим', 'нормальный режим'.";
+// Try to read russian-rules.md from the skill directory for a richer prompt.
+// Falls back to an inline summary if the file is unavailable.
+function loadRuRules() {
+  // Look for russian-rules.md relative to this hook file's parent (repo root),
+  // then inside the caveman skill directory.
+  const candidates = [
+    path.join(__dirname, '..', 'skills', 'caveman', 'russian-rules.md'),
+    path.join(process.cwd(), 'skills', 'caveman', 'russian-rules.md'),
+  ];
+  for (const p of candidates) {
+    try {
+      if (fs.existsSync(p)) {
+        return "РЕЖИМ CAVEMAN-RU АКТИВЕН (по умолчанию: ru-full).\n\n" +
+          fs.readFileSync(p, 'utf8');
+      }
+    } catch (e) {
+      // Silent fail — try next candidate
+    }
+  }
+  // Inline fallback — covers plugin installs where repo is not available
+  return "РЕЖИМ CAVEMAN-RU АКТИВЕН (по умолчанию: ru-full). Отвечай по-русски, сжато, как умный пещерный человек. " +
+    "Приоритеты: 1) понятность 2) краткость 3) техническая точность 4) красота. " +
+    "Резать: вводные (конечно, в целом, скорее всего), вежливые обёртки (могу помочь, давайте разберём), " +
+    "паразитные конструкции (проблема заключается в том, что). " +
+    "Сжимать синтаксис: 'проблема в том, что X' → 'проблема: X'. " +
+    "'приводит к тому, что Y' → '→ Y'. 'для того чтобы' → 'чтобы'. " +
+    "Фрагменты допустимы. Подлежащее опускать, если ясно. " +
+    "Шаблон: [что] [действие] [причина]. [следующий шаг]. " +
+    "Инварианты — НЕ ТРОГАТЬ: код, команды оболочки, URL, пути, имена файлов, API, функции, классы, " +
+    "переменные, библиотеки, JSON/YAML/XML/SQL, трассировки стека, цитаты ошибок. " +
+    "Список разрешённых сокращений: т.к., т.е., и т.д., см., напр., кол-во, к-рый, св-во, БД, ОС, ПО, ЧТД. Новые не изобретать. " +
+    "Не: 'Конечно! Я с радостью помогу. Проблема, скорее всего, связана с тем, что...' " +
+    "Да: 'Ошибка в промежуточном обработчике авторизации. Проверка срока действия: `<` вместо `<=`. Исправление:' " +
+    "Код/коммиты/запросы на слияние — нормальный текст. " +
+    "Уровни: /caveman ru-lite | ru-full | ru-ultra | ru-notes. " +
+    "Выключение: 'stop caveman', 'normal mode', 'обычный режим', 'нормальный режим'.";
+}
 
-let output = defaultLang === 'ru' ? RU_RULES : EN_RULES;
+let output = defaultLang === 'ru' ? loadRuRules() : EN_RULES;
 
 // --- 4. Detect missing statusline config — nudge Claude to help set it up
 try {

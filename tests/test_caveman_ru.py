@@ -8,10 +8,9 @@ import unittest
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-SKILL_DIR = REPO_ROOT / "skills" / "caveman-ru"
+SKILL_DIR = REPO_ROOT / "skills" / "caveman"
 CORPUS = REPO_ROOT / "tests" / "corpus-ru" / "examples.json"
-RULES = REPO_ROOT / "rules" / "caveman-ru-activate.md"
-COMMAND = REPO_ROOT / "commands" / "caveman-ru.toml"
+COMMAND = REPO_ROOT / "commands" / "caveman.toml"
 EVAL_PROMPTS = REPO_ROOT / "evals" / "prompts" / "ru.txt"
 MODE_TRACKER = REPO_ROOT / "hooks" / "caveman-mode-tracker.js"
 
@@ -19,31 +18,40 @@ LEVELS = ["ru-lite", "ru-full", "ru-ultra", "ru-notes"]
 
 
 class RussianCavemanAssetsTests(unittest.TestCase):
-    def test_skill_md_exists_with_frontmatter(self):
+    def test_main_skill_md_has_russian_levels(self):
         skill = SKILL_DIR / "SKILL.md"
         self.assertTrue(skill.exists(), f"missing {skill}")
         text = skill.read_text(encoding="utf-8")
         self.assertTrue(text.startswith("---\n"), "SKILL.md must start with YAML frontmatter")
-        self.assertIn("name: caveman-ru", text)
+        self.assertIn("name: caveman", text)
+        for lvl in LEVELS:
+            self.assertIn(lvl, text, f"main SKILL.md must mention {lvl}")
+
+    def test_russian_rules_file_exists(self):
+        rules = SKILL_DIR / "russian-rules.md"
+        self.assertTrue(rules.exists(), f"missing {rules}")
+        text = rules.read_text(encoding="utf-8")
+        self.assertIn("Инварианты", text)
         self.assertIn("ru-lite", text)
         self.assertIn("ru-full", text)
         self.assertIn("ru-ultra", text)
         self.assertIn("ru-notes", text)
 
     def test_abbreviations_whitelist_present(self):
-        abbr = SKILL_DIR / "abbreviations.md"
+        abbr = SKILL_DIR / "abbreviations-ru.md"
         self.assertTrue(abbr.exists(), f"missing {abbr}")
         text = abbr.read_text(encoding="utf-8")
         for token in ["т.к.", "т.е.", "и т.д.", "см.", "напр.", "кол-во", "ЧТД"]:
             self.assertIn(token, text, f"whitelist must mention {token!r}")
 
-    def test_activation_rule_exists(self):
-        self.assertTrue(RULES.exists(), f"missing {RULES}")
-        text = RULES.read_text(encoding="utf-8")
-        self.assertIn("Инварианты", text)
-        self.assertIn("stop caveman", text)
+    def test_activation_rule_mentions_russian(self):
+        rule = REPO_ROOT / "rules" / "caveman-activate.md"
+        self.assertTrue(rule.exists())
+        text = rule.read_text(encoding="utf-8")
+        self.assertIn("ru-full", text)
+        self.assertIn("обычный режим", text)
 
-    def test_command_toml_exists(self):
+    def test_command_toml_has_russian_levels(self):
         self.assertTrue(COMMAND.exists(), f"missing {COMMAND}")
         text = COMMAND.read_text(encoding="utf-8")
         self.assertIn("description", text)

@@ -402,11 +402,11 @@ Russian Caveman cut filler intros, polite wrappers, parasitic constructions. Arr
 
 **Invariants never touched:** code, shell, URL, paths, filenames, API, functions, classes, variables, JSON/YAML/SQL, stack traces, error quotes.
 
-**Allowed abbreviations:** only well-known Russian shorthand — `т.к.`, `т.е.`, `и т.д.`, `и т.п.`, `см.`, `напр.`, `кол-во`, `к-рый`, `св-во`, `ЧТД`. No inventing new ones. Full list: [`skills/caveman-ru/abbreviations.md`](skills/caveman-ru/abbreviations.md).
+**Allowed abbreviations:** only well-known Russian shorthand — `т.к.`, `т.е.`, `и т.д.`, `и т.п.`, `см.`, `напр.`, `кол-во`, `к-рый`, `св-во`, `ЧТД`. No inventing new ones. Full list: [`skills/caveman/abbreviations-ru.md`](skills/caveman/abbreviations-ru.md).
 
 **Turn off:** `stop caveman`, `обычный режим`, `нормальный режим`.
 
-Level stick until you change it or session end. Full rules: [`skills/caveman-ru/SKILL.md`](skills/caveman-ru/SKILL.md). Test corpus: [`tests/corpus-ru/`](tests/corpus-ru/).
+Level stick until you change it or session end. Full rules: [`skills/caveman/russian-rules.md`](skills/caveman/russian-rules.md). Test corpus: [`tests/corpus-ru/`](tests/corpus-ru/).
 
 #### How to pick language
 
@@ -447,7 +447,7 @@ With auto-detect on, `UserPromptSubmit` hook look at each prompt. If ≥30% of l
 
 **Statusline** show active mode, e.g. `[CAVEMAN:RU-FULL]`, so you see at a glance which language + level active.
 
-**Other agents** (Cursor, Windsurf, Cline): sync workflow ship Russian rule files alongside English ones — `.cursor/rules/caveman-ru.mdc`, `.windsurf/rules/caveman-ru.md`, `.clinerules/caveman-ru.md`. Cursor/Windsurf Russian rules are **opt-in** (agent-requested / model-decision triggers), English stays default. Cline load both.
+**Other agents** (Cursor, Windsurf, Cline): Russian levels now part of unified activation rule. All agents that load the main caveman rule automatically know about `/caveman ru-*` levels. Supplementary files (`russian-rules.md`, `abbreviations-ru.md`) synced alongside main skill.
 
 #### When to use which level
 
