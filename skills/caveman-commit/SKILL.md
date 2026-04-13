@@ -4,7 +4,8 @@ description: >
   Ultra-compressed commit message generator. Cuts noise from commit messages while preserving
   intent and reasoning. Conventional Commits format. Subject ≤50 chars, body only when "why"
   isn't obvious. Use when user says "write a commit", "commit message", "generate commit",
-  "/commit", or invokes /caveman-commit. Auto-triggers when staging changes.
+  "напиши коммит", "сообщение коммита", "/commit", or invokes /caveman-commit.
+  Auto-triggers when staging changes.
 ---
 
 Write commit messages terse and exact. Conventional Commits format. No fluff. Why over what.
@@ -63,3 +64,36 @@ Always include body for: breaking changes, security fixes, data migrations, anyt
 ## Boundaries
 
 Only generates the commit message. Does not run `git commit`, does not stage files, does not amend. Output the message as a code block ready to paste. "stop caveman-commit" or "normal mode": revert to verbose commit style.
+
+## Russian Mode
+
+When caveman is in `ru-*` mode, or user writes in Russian, or project uses Russian commit messages:
+
+**Subject line** stays in English by default (Conventional Commits standard). Switch to Russian subject only if project convention requires it (check `git log` for existing style).
+
+**Body** in Russian. Same compression rules as main caveman-ru:
+- Cut filler, polite wrappers, parasitic constructions
+- `причина: X` not `это связано с тем, что X`
+- Fragments OK, pronouns droppable
+
+Example — Russian body:
+```
+feat(api): add GET /users/:id/profile
+
+Мобильному клиенту нужны данные профиля без полного объекта
+пользователя — снижает трафик при холодном запуске.
+
+Closes #128
+```
+
+Example — Russian project with Russian subjects:
+```
+feat(api): добавить GET /users/:id/profile
+
+Мобильный клиент: данные профиля без полного payload →
+меньше трафик при холодном запуске.
+
+Closes #128
+```
+
+**Never** translate: types (`feat`/`fix`/etc.), scopes, issue refs, `BREAKING CHANGE` label, `Co-authored-by` trailers.

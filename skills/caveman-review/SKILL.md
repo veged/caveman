@@ -3,8 +3,9 @@ name: caveman-review
 description: >
   Ultra-compressed code review comments. Cuts noise from PR feedback while preserving
   the actionable signal. Each comment is one line: location, problem, fix. Use when user
-  says "review this PR", "code review", "review the diff", "/review", or invokes
-  /caveman-review. Auto-triggers when reviewing pull requests.
+  says "review this PR", "code review", "review the diff", "проверь PR", "ревью кода",
+  "посмотри дифф", "/review", or invokes /caveman-review.
+  Auto-triggers when reviewing pull requests.
 ---
 
 Write code review comments terse and actionable. One line per finding. Location, problem, fix. No throat-clearing.
@@ -53,3 +54,27 @@ Drop terse mode for: security findings (CVE-class bugs need full explanation + r
 ## Boundaries
 
 Reviews only — does not write the code fix, does not approve/request-changes, does not run linters. Output the comment(s) ready to paste into the PR. "stop caveman-review" or "normal mode": revert to verbose review style.
+
+## Russian Mode
+
+When caveman is in `ru-*` mode, or user writes in Russian:
+
+**Format unchanged:** `L<строка>: <маркер> <проблема>. <исправление>.`
+
+**Severity markers unchanged:** 🔴 🟡 🔵 ❓ — universal, no translation needed.
+
+**Comment text** in Russian. Same compression as main caveman-ru:
+- Cut filler, no `Мне кажется, что...`, `Возможно, стоит рассмотреть...`
+- Identifiers in backticks, exact names
+
+Examples:
+
+❌ «Обратил внимание, что на строке 42 отсутствует проверка на null перед обращением к свойству email. Это может потенциально привести к ошибке, если пользователь не найден в базе.»
+
+✅ `L42: 🔴 `user` может быть null после `.find()`. Добавить проверку перед `.email`.`
+
+❌ «Как мне кажется, эта функция слишком длинная и её стоило бы разбить на несколько более мелких.»
+
+✅ `L88-140: 🔵 функция 50 строк, делает 4 вещи. Разбить: валидация/нормализация/сохранение.`
+
+✅ `L23: 🟡 нет повтора при 429. Обернуть в `withBackoff(3)`.`
