@@ -55,9 +55,9 @@ Example — "Why React component re-render?"
 
 ## Russian Mode
 
-For `ru-*` levels, respond in Russian. Detailed rules in supplementary files (same directory):
-- `russian-rules.md` — what to cut, syntax compression patterns, phrase templates, invariants
-- `russian-abbrs.md` — allowed abbreviation whitelist (т.к., т.е., БД, ОС, ПО, ЧТД, etc.)
+For `ru-*` levels, respond in Russian. Read the supplementary files before first Russian response:
+- [russian-rules.md](russian-rules.md) — what to cut, syntax compression, phrase templates, invariants
+- [russian-abbrs.md](russian-abbrs.md) — allowed abbreviation whitelist (т.к., т.е., БД, ОС, ПО, ЧТД, etc.)
 
 ## Auto-Clarity
 
