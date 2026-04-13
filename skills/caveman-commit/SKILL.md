@@ -67,14 +67,13 @@ Only generates the commit message. Does not run `git commit`, does not stage fil
 
 ## Russian Mode
 
-When caveman is in `ru-*` mode, or user writes in Russian, or project uses Russian commit messages:
+When caveman is in `ru-*` mode, or user writes in Russian, or project uses Russian commit messages.
+
+Full Russian compression rules: [russian-rules.md](../caveman/russian-rules.md) — read before first Russian commit message.
 
 **Subject line** stays in English by default (Conventional Commits standard). Switch to Russian subject only if project convention requires it (check `git log` for existing style).
 
-**Body** in Russian. Same compression rules as main caveman-ru:
-- Cut filler, polite wrappers, parasitic constructions
-- `причина: X` not `это связано с тем, что X`
-- Fragments OK, pronouns droppable
+**Body** in Russian with compression: cut filler, parasitic constructions, `причина: X` not `это связано с тем, что X`.
 
 Example — Russian body:
 ```

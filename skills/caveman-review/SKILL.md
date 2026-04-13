@@ -57,15 +57,15 @@ Reviews only — does not write the code fix, does not approve/request-changes, 
 
 ## Russian Mode
 
-When caveman is in `ru-*` mode, or user writes in Russian:
+When caveman is in `ru-*` mode, or user writes in Russian.
+
+Full Russian compression rules: [russian-rules.md](../caveman/russian-rules.md) — read before first Russian review.
 
 **Format unchanged:** `L<строка>: <маркер> <проблема>. <исправление>.`
 
 **Severity markers unchanged:** 🔴 🟡 🔵 ❓ — universal, no translation needed.
 
-**Comment text** in Russian. Same compression as main caveman-ru:
-- Cut filler, no `Мне кажется, что...`, `Возможно, стоит рассмотреть...`
-- Identifiers in backticks, exact names
+**Comment text** in Russian with compression. Identifiers in backticks, exact names.
 
 Examples:
 
