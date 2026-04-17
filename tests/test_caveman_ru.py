@@ -39,11 +39,18 @@ class RussianCavemanAssetsTests(unittest.TestCase):
         self.assertIn("ru-notes", text)
 
     def test_abbreviations_in_russian_rules(self):
+        """Whitelist contains only token-efficient abbreviations (uppercase
+        acronyms like БД, ОС). Dotted/hyphenated forms (т.к., кол-во) actually
+        cost MORE tokens than full words in BPE — they must be explicitly
+        forbidden, not whitelisted."""
         rules = SKILL_DIR / "russian-rules.md"
         self.assertTrue(rules.exists(), f"missing {rules}")
         text = rules.read_text(encoding="utf-8")
-        for token in ["т.к.", "т.е.", "и т.д.", "см.", "напр.", "кол-во", "ЧТД"]:
-            self.assertIn(token, text, f"russian-rules.md must mention {token!r}")
+        for token in ["БД", "ОС", "ПО", "ОЗУ", "ЧТД"]:
+            self.assertIn(token, text, f"whitelist must include {token!r}")
+        # File must explicitly flag token-wasteful forms as forbidden
+        self.assertIn("Запрещены", text)
+        self.assertIn("т.к.", text)  # mentioned as forbidden example
 
     def test_activation_rule_mentions_russian(self):
         rule = REPO_ROOT / "rules" / "caveman-activate.md"
